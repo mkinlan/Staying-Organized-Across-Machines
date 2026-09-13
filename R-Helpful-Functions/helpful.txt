@@ -1,1 +1,202 @@
+# Helpful functions
+
+## LOADING PACKAGES
+pacman::p_load(readr, readxl,ggplot2,dplyr)
+
+
+
+### READING DATA -------------------------------------------
+#how to take a large CSV file and break it into chunks to run in another system
+df<-read_csv("/Users/yourname/Downloads/OpenRMA_Global_Ver4_26-Apr-2023.csv")
+
+chunk<-10000
+n<-nrow(df)
+r<-rep(1:ceiling(n/chunk),each=chunk)[1:n]
+d<-split(df,r)
+
+df1<-d[[1]] #extract list element
+
+####from Excel
+
+
+
+#remove all functions from workspace
+rm.fn<-function(){rm(list=lsf.str(envir = .GlobalEnv),envir=.GlobalEnv)}
+
+
+### NULLS-------------------------------------------------
+#Change blanks, "not available", etc. to NULLs recognized by R
+all[all == "" | all == " " | all == "Not Available" | all == "NA"| all == "not available"| all == "Not available" | all == "N/A"]<-NA
+
+#Fill entire column with nulls
+dtc$address<-NA
+
+# Function to drop rows with null values in a specified column
+drop_null_rows <- function(df, column) {
+  # Drop rows where the specified column is null
+  x<-length(df)
+  df2 <- df[!is.na(df[[column]]) & df[[column]] != "" & df[[column]] != "NA" & df[[column]] != "N/A", ]
+  y<-x-length(df2)
+  print(paste("Rows dropped:",y))
+  return(df2)
+}
+
+#Drop null rows
+Df <- drop_null_rows(df, "CASE_NUMBER")
+
+#taking value from non-blank column or if blank, taking value from another column
+test<-partners %>% select (BEID.x,BEID.y) %>%
+  mutate(BEID=case_when(
+    BEID.x==BEID.y ~ BEID.x,
+    is.na(BEID.x) & !is.na(BEID.y) ~ BEID.y,
+    is.na(BEID.y) & !is.na(BEID.x) ~ BEID.x,
+    TRUE ~ NA)
+  )
+
+#Replacing nulls and blanks
+mydata<-mydata %>% mutate(across(everything(),as.character))#changing to chars b/c weird date fields that mess up removing blanks
+mydata <- mydata %>% mutate_all(~replace(.,is.na(.),"Blank"))
+
+#is na on certain vars
+serials<-serials %>% filter_at(vars(Covered,`End of Sale`, `End of Support`),all_vars(!is.na(.)))
+
+df["CLAIMED_SN"][df["CLAIMED_SN"]==""]<-NA
+
+aci[aci == "" | aci == " " | aci == "Not Available" | aci == "NA"| aci == "not available"| aci == "Not available" |
+      aci =="N/A"]<-NA
+
+### PYTHON in R -------------------------------------------
+#reading python obj back into R
+train_df_smote<-as_tibble(py$train_df_smote)
+test_df<-as_tibble(py$test_df)
+
+
+### JOINS & MERGES--------------------------------------------
+jul27<-inner_join(jul27,changed,join_by('SHIPMENT_LINE_ID','ENTITLEMENT_AUDIT_ID'))
+
+mydf<-left_join(df, test3, by=c('CASE_NUMBER'='CASE_NUMBER'))
+
+dtc<-dtc %>% unite('CUST_ADDRESS',CUST_STREET:CUST_CITY,sep=",",remove=FALSE)
+
+df<-rbind(dtc,apiresults)
+
+### DATA TYPES --------------------------------------
+
+# change char vars to num
+df<-df %>% mutate_all(funs(ifelse(.=="Yes",1,0)))
+
+#convert all but two cols
+mydata<-mydata %>% mutate_at(vars(-c("SHIPMENT_LINE_ID","ENTITLEMENT_AUDIT_ID")),as.factor)#converting all but first two cols to factors b/c daisy doesn't like chars
+
+### MUTATIONS & CLEANING------------------------------------
+
+#Rename column by index
+colnames(apiresults)[21]<-"CUST_LATITUDE"
+
+#Trim whitespace
+mapping<-as.data.frame(apply(mapping,MARGIN = 2, FUN=trimws,which=c("both")))
+
+dtc$CUST_ADDRESS<-paste(dtc$CUST_STREET,dtc$CUST_CITY,dtc$CUST_POSTAL_CODE,dtc$CUST_COUNTRY, sep=",")
+
+#Change column name to be row name
+modeldata<-modeldata %>% textshape::column_to_rownames(.,'ID')
+
+#select cols and remove leading and trailing whitespace
+serials<-serials %>% select(`Serial Number`,`Installed at Address`, `Installed at City`,`Installed at State/Province`,`Installed at Country`) %>%
+  mutate(across(where(is.character), str_trim))
+
+#case when syntax
+ship<-ship %>% mutate(RPLMT_TRANSPORT_MODE=case_when(grepl("-Air-",DESCRIPTION,ignore.case=TRUE) ~"AIR",
+                                                     grepl("-Parcel-",DESCRIPTION,ignore.case=TRUE) ~"GROUND",
+                                                     grepl("-GROUND-",DESCRIPTION,ignore.case=TRUE)~"GROUND"))
+
+#Filtering based on a char symbol
+sns2_errors<-sns2 %>% filter(grepl('-',SERIAL_NUMBER))
+sns2_clean<-sns2 %>% filter(!grepl('-',SERIAL_NUMBER))
+
+#Filtering using %like%
+library(data.table)
+setDT(us)
+test<-us[TABLE_NAME %like% 'SALES_ORDER']
+
+#Substitutions
+pids$`Product Id`<-gsub("=","",as.character(pids$`Product Id`))
+
+#flagging duplicates
+df %>%
+  group_by(id, day) %>%
+  mutate(
+    count = row_number(), # Counts rows by group
+    dup   = count > 1     # TRUE if there is more than one row per group
+  )
+
+#For duplicate project ids (two rows per ID), group by project ID then select the columns that are not duplicates so can determine why duplicate exist
+library(data.table)
+# Convert the data frame to a data.table in place
+setDT(df)
+# Print the structure to verify
+str(df)
+# Define the columns to group by, excluding "PROJECT_ID"
+list_names <- colnames(df)[colnames(df) != "PROJECT_ID"]
+# Perform the transformation using uniqueN
+data_count <- df[, lapply(.SD, uniqueN), by = .(PROJECT_ID), .SDcols = list_names]
+print(data_count)
+
+
+### FUNCTIONS ---------------------------------------------
+
+#Geocoding loop
+assign("has_internet_via_proxy", TRUE, environment(curl::has_internet))
+
+for(i in 1:nrow(coords)){
+  origin_lat <- coords$DEPOT_LATITUDE[i]
+  origin_lon <- coords$DEPOT_LONGITUDE[i]
+  destination_lat <- coords$CUST_LAT[i]
+  destination_lon <- coords$CUST_LON[i]
+
+  if(origin_lat != 0){
+    d <- google_distance(origin=c(origin_lat,origin_lon),destination=c(destination_lat,destination_lon), key=key)
+  }else{
+    d <- 0
+  }
+  coords$results[i]<-d$rows
+}
+
+
+#unlisting a list col in a df
+test2<-test %>% unnest(results)
+
+
+assign("has_internet_via_proxy", TRUE, environment(curl::has_internet))
+
+
+
+#################################
+
+sns_split<-sns2_errors %>% separate(SERIAL_NUMBER,c("Junk","SERIAL_NUMBER"),sep = "-",remove = TRUE) %>% select(-Junk)
+
+
+####DTA FILES################################################################################
+url <- "http://www.ats.ucla.edu/stat/stata/examples/methods_matter/chapter9/angrist.dta"
+
+destfile <- "/Users/yourname/Downloads/file.dta"
+download.file(url, destfile)
+
+if(file.exists(destfile)) {
+  print("File downloaded successfully.")
+} else {
+  print("File download failed.")
+}
+########################################################################################
+
+#PLOTS
+
+#HELPFUL
+
+#To find the pathway for the most recent file in a folder: 
+df <- file.info(list.files("C:/Users//Documents/R/COVID_Project/COVID-19/csse_covid_19_data/csse_covid_19_daily_reports", full.names = T))
+rownames(df)[which.max(df$mtime)]
+
+#to get the path to the file currently shown in the source pane:
+rstudioapi::getSourceEditorContext()$path
 
