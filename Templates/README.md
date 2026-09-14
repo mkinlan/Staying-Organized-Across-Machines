@@ -2,5 +2,7 @@
 
 Subfolder: 
 * <b>Templater</b>- JavaScript template for appending text from one note in Obsidian and moving it to another note. Why is this better than copy/paste? Because it suggests notes where you might want to put that text (and I forget the titles of my notes sometimes). It's not super fancy - just searches the names of your notes so you can choose the one you want. 
-* <b>Data-Projects</b> - A simple folder structure for data projects
+* <b>Data-Projects</b>
+    * <b>data-project-template.md</b> - A simple folder structure for data projects, suitable for any IDE
+    * <b>myTemplates package files</b> - Local package for Positron to create reproducible file structure in your projects
   
