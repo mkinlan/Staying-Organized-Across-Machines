@@ -2,8 +2,13 @@
 
 Slides and other resources from my 2026 posit talk, <b>"Staying Organized Across Machines: Practical Workflows for Data Scientists with Busy Brains"</b>. 
 
-Check out the <b>Workflow</b> folder for more detailed diagrams for Obsidian and Calendars by Readdle. 
+* [Talk Slides](https://github.com/mkinlan/Staying-Organized-Across-Machines/blob/main/staying_organized_across_machines_slides.pptx) - Full slides from the talk, exactly as given
 
-Interested in templates? The <b>Templates</b> folder has a general project template and R code for how to use it in Positron.
+* [Workflow Slides](https://github.com/mkinlan/Staying-Organized-Across-Machines/tree/main/Workflow) - More detailed diagrams of the Obsidian and Calendars by Readdle slides from my talk
 
-Just looking for the <b>slides</b>? They'll be up next week after conf!
+* [Templates](https://github.com/mkinlan/Staying-Organized-Across-Machines/tree/main/Templates) - General project template and R code for how to use it in Positron **(this is the myTemplates package)**
+
+* [R-Helpful-Functions](https://github.com/mkinlan/Staying-Organized-Across-Machines/tree/main/R-Helpful-Functions) - My giant list of frequently-used functions that I've carried around with my from job to job
+
+
+
