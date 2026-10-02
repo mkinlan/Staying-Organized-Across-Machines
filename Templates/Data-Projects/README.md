@@ -59,13 +59,21 @@ C:/Users/<you>/myTemplates
 ⚠️ Make sure `DESCRIPTION`, `R/`, and `inst/` end up **directly inside** that
 folder — not nested inside an extra `myTemplates/myTemplates/` folder.
 
-## 4. Install the package
+
+## 4. Choose a location for your projects
+Edit the new_project.R file's parent_dir function with where your projects should live (OneDrive, etc.). 
+
+This is where the folder structure will be created. 
+
+![alt text](image.png)
+
+## 5. Install the package
 
 ```r
 devtools::install("C:/Users/<you>/myTemplates")
 ```
 
-## 5. (Optional) Auto-load the quick helper on every R startup
+## 6. (Optional) Auto-load the quick helper on every R startup
 
 Open your `.Rprofile`:
 ```r
@@ -79,7 +87,9 @@ source("C:/Users/<you>/myTemplates/new_project.R")
 
 Restart Positron.
 
-## 6. Use it
+## 7.  Use myTemplates folder structure
+
+From inside your new project, run this code to create a new folder with the myTemplates subfolder structure.
 
 ```r
 # Direct call — builds the folder structure at the given path
