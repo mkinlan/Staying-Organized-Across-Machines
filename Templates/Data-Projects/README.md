@@ -89,7 +89,7 @@ Restart Positron.
 
 ## 7.  Use myTemplates folder structure
 
-From inside your new project, run this code to create a new folder with the myTemplates subfolder structure.
+Run this code to create a new folder with the myTemplates subfolder structure.
 
 ```r
 # Direct call — builds the folder structure at the given path
